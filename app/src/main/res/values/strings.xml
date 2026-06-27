@@ -1,0 +1,100 @@
+<resources>
+    <string name="app_name">Автомобильный регистратор</string>
+    <string name="camera_back">Задняя</string>
+    <string name="camera_front">Фронтальная</string>
+    <string name="start_recording">Начать запись</string>
+    <string name="stop_recording">Остановить запись</string>
+    <string name="hide_preview">Отключить предпросмотр</string>
+    <string name="show_preview">Вернуться к предпросмотру</string>
+    <string name="status_initializing">Статус: подготовка камеры</string>
+    <string name="status_camera_ready">Статус: камера готова</string>
+    <string name="status_service_starting">Статус: запуск фоновой записи</string>
+    <string name="status_recording">Статус: идёт запись</string>
+    <string name="status_stopping">Статус: сохранение видео</string>
+    <string name="status_saved">Статус: видео сохранено: %1$s</string>
+    <string name="status_error">Ошибка: %1$s</string>
+    <string name="status_camera_permission_required">Для работы требуется разрешение камеры</string>
+    <string name="status_microphone_unavailable">Камера готова. Звук не будет записан без разрешения микрофона</string>
+    <string name="status_permissions_settings">Разрешите камеру и микрофон в настройках приложения</string>
+    <string name="status_protected_stub">Статус: событие защиты отмечено</string>
+    <string name="open_permission_settings">Открыть настройки разрешений</string>
+    <string name="preview_auto_off_label">Автоматически отключать предпросмотр</string>
+    <string name="duration_initial">Длительность: 00:00:00</string>
+    <string name="duration_plain_initial">00:00:00</string>
+    <string name="duration_value">Длительность: %1$s</string>
+    <string name="charging_state_initial">Питание: проверка…</string>
+    <string name="charging_connected">зарядка подключена</string>
+    <string name="charging_disconnected">зарядка не подключена</string>
+    <string name="battery_percent">батарея %1$d%%</string>
+    <string name="battery_unknown">заряд батареи неизвестен</string>
+    <string name="charging_and_battery">%1$s, %2$s</string>
+    <string name="minimal_rec">● REC</string>
+    <string name="battery_warning_title">Зарядка не подключена</string>
+    <string name="battery_warning_message">Камера, запись и передача данных быстро расходуют батарею. Рекомендуется подключить автомобильную зарядку.</string>
+    <string name="battery_warning_do_not_show_again">Не показывать повторно во время текущей поездки</string>
+    <string name="continue_recording">Продолжить запись</string>
+    <string name="notification_channel_name">Запись видеорегистратора</string>
+    <string name="notification_channel_description">Постоянное уведомление фоновой видеозаписи</string>
+    <string name="notification_title">Видеорегистратор работает</string>
+    <string name="notification_details">%1$s · %2$s камера · %3$s</string>
+    <string name="notification_protect">Защитить</string>
+    <string name="notification_stop">Остановить</string>
+
+    <string-array name="preview_auto_off_options">
+        <item>Через 15 секунд</item>
+        <item>Через 30 секунд</item>
+        <item>Через 1 минуту</item>
+        <item>Сразу после начала записи</item>
+        <item>Никогда</item>
+    </string-array>
+    <string name="protect_recording">Защитить запись</string>
+    <string name="recordings">Записи</string>
+    <string name="storage_settings">Хранилище</string>
+    <string name="recording_protected">Запись защищена</string>
+    <string name="storage_error_title">Запись остановлена</string>
+    <string name="storage_error_message">Недостаточно свободной памяти</string>
+    <string name="settings_title">Настройки</string>
+    <string name="segment_duration">Длительность фрагмента</string>
+    <string name="maximum_storage">Максимальный объём записей</string>
+    <string name="free_space_reserve">Резерв свободной памяти</string>
+    <string name="custom_gib">Своё значение, ГБ</string>
+    <string name="save">Сохранить</string>
+    <string name="storage_summary">Использовано: %1$s\nЛимит: %2$s\nСвободно: %3$s\nЗащищено: %4$s</string>
+    <string name="play">Воспроизвести</string>
+    <string name="protect">Защитить</string>
+    <string name="unprotect">Снять защиту</string>
+    <string name="delete">Удалить</string>
+    <string name="delete_protected_title">Удалить защищённую запись?</string>
+    <string name="file_missing">Файл отсутствует</string>
+    <string name="start_trip">Начать поездку</string>
+    <string name="end_trip">Завершить поездку</string>
+    <string name="location_permission_title">Геолокация поездки</string>
+    <string name="location_permission_explanation">Геолокация нужна для скорости, маршрута и статистики поездки. Видео продолжит записываться и без неё.</string>
+    <string name="continue_without_gps">Продолжить без GPS</string>
+    <string name="allow_location">Разрешить</string>
+    <string name="current_speed_initial">Скорость: 0 км/ч · максимум 0 км/ч</string>
+    <string name="current_speed">Скорость: %1$s км/ч · максимум %2$s км/ч</string>
+    <string name="gps_initial">GPS: ожидание</string>
+    <string name="gps_active">GPS активен · точность %.0f м</string>
+    <string name="gps_unavailable">GPS недоступен: %1$s</string>
+    <string name="trip_distance_initial">Расстояние: 0 км</string>
+    <string name="trip_distance">Расстояние: %.2f км</string>
+    <string name="gps_interval">Частота GPS</string>
+    <string name="gps_accuracy_mode">Режим точности GPS</string>
+    <string name="gps_max_accuracy">Максимальная погрешность</string>
+    <string name="custom_meters">Своё значение, метров</string>
+    <string name="low_battery_gps">При заряде ниже 15% снизить частоту GPS до 5 секунд</string>
+    <string name="trip_start_mode">Начало поездки при подключении зарядки</string>
+    <string name="camera_setting">Камера</string>
+    <string name="power_end_delay">Завершение после отключения зарядки</string>
+    <string name="stop_end_delay">Завершение после длительной остановки</string>
+    <string name="open_trip_recordings">Открыть список записей</string>
+    <string name="cloud_later">Будет доступно после подключения облачного модуля</string>
+    <string name="no_completed_trip">Завершённая поездка не найдена</string>
+    <string name="active_trip_found">Найдена активная поездка</string>
+    <string name="active_trip_recovery">Предыдущее выполнение было прервано. Продолжить поездку или завершить её?</string>
+    <string name="finish_trip">Завершить</string>
+    <string name="continue_trip">Продолжить</string>
+    <string name="charging_trip_prompt_title">Зарядка подключена</string>
+    <string name="charging_trip_prompt">Начать новую поездку?</string>
+</resources>

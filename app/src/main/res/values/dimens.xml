@@ -1,0 +1,4 @@
+<resources>
+    <dimen name="dialog_content_padding">24dp</dimen>
+    <dimen name="navigation_content_padding">16dp</dimen>
+</resources>

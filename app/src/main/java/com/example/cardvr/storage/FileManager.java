@@ -1,0 +1,47 @@
+package com.example.cardvr.storage;
+
+import android.content.Context;
+import android.os.Environment;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.UUID;
+
+public final class FileManager {
+
+    private static final String VIDEO_DIRECTORY = "CarDvr";
+    private static final String FILE_PREFIX = "DASHCAM_";
+    private static final String FILE_EXTENSION = ".mp4";
+    private static final String DATE_PATTERN = "yyyy-MM-dd_HH-mm-ss";
+
+    private final Context appContext;
+
+    public FileManager(Context context) {
+        appContext = context.getApplicationContext();
+    }
+
+    public File createVideoFile() throws IOException {
+        File baseDirectory = appContext.getExternalFilesDir(Environment.DIRECTORY_MOVIES);
+        if (baseDirectory == null) {
+            baseDirectory = new File(appContext.getFilesDir(), "videos");
+        }
+
+        File videoDirectory = new File(baseDirectory, VIDEO_DIRECTORY);
+        if (!videoDirectory.exists() && !videoDirectory.mkdirs()) {
+            throw new IOException("Не удалось создать папку для видео: "
+                    + videoDirectory.getAbsolutePath());
+        }
+
+        String timestamp = new SimpleDateFormat(DATE_PATTERN, Locale.US).format(new Date());
+        String uniqueId = UUID.randomUUID().toString().substring(0, 4);
+        File videoFile = new File(videoDirectory,
+                FILE_PREFIX + timestamp + "_" + uniqueId + FILE_EXTENSION);
+        if (videoFile.exists()) {
+            throw new IOException("Файл с таким именем уже существует");
+        }
+        return videoFile;
+    }
+}
