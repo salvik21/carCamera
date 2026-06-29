@@ -1,0 +1,1255 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 5,
+    "identityHash": "75db5835dd16a4167d74544ddd56b4de",
+    "entities": [
+      {
+        "tableName": "video_segments",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fileName` TEXT NOT NULL, `filePath` TEXT NOT NULL, `startTime` INTEGER NOT NULL, `endTime` INTEGER, `durationMs` INTEGER NOT NULL, `sizeBytes` INTEGER NOT NULL, `status` TEXT NOT NULL, `cameraId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `protectedReason` TEXT, `uploadStatus` TEXT NOT NULL, `transferStatus` TEXT NOT NULL, `tripId` INTEGER, `startLatitude` REAL, `startLongitude` REAL, `endLatitude` REAL, `endLongitude` REAL, `maxSpeedKmh` REAL NOT NULL, `cloudStatus` TEXT NOT NULL, `remoteFileId` TEXT, `cloudChecksum` TEXT, `cloudUploadedAt` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fileName",
+            "columnName": "fileName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "filePath",
+            "columnName": "filePath",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startTime",
+            "columnName": "startTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endTime",
+            "columnName": "endTime",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "durationMs",
+            "columnName": "durationMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sizeBytes",
+            "columnName": "sizeBytes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cameraId",
+            "columnName": "cameraId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "protectedReason",
+            "columnName": "protectedReason",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "uploadStatus",
+            "columnName": "uploadStatus",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "transferStatus",
+            "columnName": "transferStatus",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tripId",
+            "columnName": "tripId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "startLatitude",
+            "columnName": "startLatitude",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "startLongitude",
+            "columnName": "startLongitude",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "endLatitude",
+            "columnName": "endLatitude",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "endLongitude",
+            "columnName": "endLongitude",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "maxSpeedKmh",
+            "columnName": "maxSpeedKmh",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cloudStatus",
+            "columnName": "cloudStatus",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remoteFileId",
+            "columnName": "remoteFileId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cloudChecksum",
+            "columnName": "cloudChecksum",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cloudUploadedAt",
+            "columnName": "cloudUploadedAt",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_video_segments_filePath",
+            "unique": true,
+            "columnNames": [
+              "filePath"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_video_segments_filePath` ON `${TABLE_NAME}` (`filePath`)"
+          },
+          {
+            "name": "index_video_segments_status_startTime",
+            "unique": false,
+            "columnNames": [
+              "status",
+              "startTime"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_video_segments_status_startTime` ON `${TABLE_NAME}` (`status`, `startTime`)"
+          }
+        ]
+      },
+      {
+        "tableName": "trips",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `startTime` INTEGER NOT NULL, `endTime` INTEGER, `status` TEXT NOT NULL, `startLatitude` REAL, `startLongitude` REAL, `endLatitude` REAL, `endLongitude` REAL, `totalDistanceMeters` REAL NOT NULL, `maxSpeedKmh` REAL NOT NULL, `averageSpeedKmh` REAL NOT NULL, `movingTimeMs` INTEGER NOT NULL, `stoppedTimeMs` INTEGER NOT NULL, `totalVideoSizeBytes` INTEGER NOT NULL, `segmentCount` INTEGER NOT NULL, `protectedSegmentCount` INTEGER NOT NULL, `hardBrakingCount` INTEGER NOT NULL, `impactCount` INTEGER NOT NULL, `possibleCrashCount` INTEGER NOT NULL, `cloudStatus` TEXT NOT NULL, `remoteFolderId` TEXT, `fullTripUploadRequested` INTEGER NOT NULL, `fullTripUploadedAt` INTEGER, `createdAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startTime",
+            "columnName": "startTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endTime",
+            "columnName": "endTime",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startLatitude",
+            "columnName": "startLatitude",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "startLongitude",
+            "columnName": "startLongitude",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "endLatitude",
+            "columnName": "endLatitude",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "endLongitude",
+            "columnName": "endLongitude",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "totalDistanceMeters",
+            "columnName": "totalDistanceMeters",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxSpeedKmh",
+            "columnName": "maxSpeedKmh",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "averageSpeedKmh",
+            "columnName": "averageSpeedKmh",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "movingTimeMs",
+            "columnName": "movingTimeMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stoppedTimeMs",
+            "columnName": "stoppedTimeMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalVideoSizeBytes",
+            "columnName": "totalVideoSizeBytes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "segmentCount",
+            "columnName": "segmentCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "protectedSegmentCount",
+            "columnName": "protectedSegmentCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hardBrakingCount",
+            "columnName": "hardBrakingCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "impactCount",
+            "columnName": "impactCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "possibleCrashCount",
+            "columnName": "possibleCrashCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cloudStatus",
+            "columnName": "cloudStatus",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remoteFolderId",
+            "columnName": "remoteFolderId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "fullTripUploadRequested",
+            "columnName": "fullTripUploadRequested",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fullTripUploadedAt",
+            "columnName": "fullTripUploadedAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_trips_status",
+            "unique": false,
+            "columnNames": [
+              "status"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_trips_status` ON `${TABLE_NAME}` (`status`)"
+          }
+        ]
+      },
+      {
+        "tableName": "location_points",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tripId` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `accuracyMeters` REAL NOT NULL, `speedKmh` REAL NOT NULL, `bearing` REAL NOT NULL, `altitude` REAL, `provider` TEXT NOT NULL, `valid` INTEGER NOT NULL, FOREIGN KEY(`tripId`) REFERENCES `trips`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tripId",
+            "columnName": "tripId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "accuracyMeters",
+            "columnName": "accuracyMeters",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "speedKmh",
+            "columnName": "speedKmh",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bearing",
+            "columnName": "bearing",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "altitude",
+            "columnName": "altitude",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "provider",
+            "columnName": "provider",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "valid",
+            "columnName": "valid",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_location_points_tripId",
+            "unique": false,
+            "columnNames": [
+              "tripId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_location_points_tripId` ON `${TABLE_NAME}` (`tripId`)"
+          },
+          {
+            "name": "index_location_points_tripId_timestamp",
+            "unique": false,
+            "columnNames": [
+              "tripId",
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_location_points_tripId_timestamp` ON `${TABLE_NAME}` (`tripId`, `timestamp`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "trips",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "tripId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "events",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tripId` INTEGER, `type` TEXT NOT NULL, `severity` TEXT NOT NULL, `confidence` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `latitude` REAL, `longitude` REAL, `speedBeforeKmh` REAL NOT NULL, `speedAfterKmh` REAL NOT NULL, `gpsAccuracyMeters` REAL NOT NULL, `longitudinalAcceleration` REAL NOT NULL, `lateralAcceleration` REAL NOT NULL, `verticalAcceleration` REAL NOT NULL, `totalAcceleration` REAL NOT NULL, `impactG` REAL NOT NULL, `gyroMagnitude` REAL NOT NULL, `orientationBefore` TEXT, `orientationAfter` TEXT, `phonePositionChanged` INTEGER NOT NULL, `protectedFromTime` INTEGER NOT NULL, `protectedUntilTime` INTEGER NOT NULL, `status` TEXT NOT NULL, `simulated` INTEGER NOT NULL, `explanation` TEXT NOT NULL, `createdAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tripId",
+            "columnName": "tripId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "severity",
+            "columnName": "severity",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "confidence",
+            "columnName": "confidence",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "speedBeforeKmh",
+            "columnName": "speedBeforeKmh",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "speedAfterKmh",
+            "columnName": "speedAfterKmh",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gpsAccuracyMeters",
+            "columnName": "gpsAccuracyMeters",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longitudinalAcceleration",
+            "columnName": "longitudinalAcceleration",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lateralAcceleration",
+            "columnName": "lateralAcceleration",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "verticalAcceleration",
+            "columnName": "verticalAcceleration",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalAcceleration",
+            "columnName": "totalAcceleration",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "impactG",
+            "columnName": "impactG",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "gyroMagnitude",
+            "columnName": "gyroMagnitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "orientationBefore",
+            "columnName": "orientationBefore",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "orientationAfter",
+            "columnName": "orientationAfter",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "phonePositionChanged",
+            "columnName": "phonePositionChanged",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "protectedFromTime",
+            "columnName": "protectedFromTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "protectedUntilTime",
+            "columnName": "protectedUntilTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "simulated",
+            "columnName": "simulated",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "explanation",
+            "columnName": "explanation",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_events_tripId",
+            "unique": false,
+            "columnNames": [
+              "tripId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_events_tripId` ON `${TABLE_NAME}` (`tripId`)"
+          },
+          {
+            "name": "index_events_type_timestamp",
+            "unique": false,
+            "columnNames": [
+              "type",
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_events_type_timestamp` ON `${TABLE_NAME}` (`type`, `timestamp`)"
+          },
+          {
+            "name": "index_events_status",
+            "unique": false,
+            "columnNames": [
+              "status"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_events_status` ON `${TABLE_NAME}` (`status`)"
+          }
+        ]
+      },
+      {
+        "tableName": "event_video_segments",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eventId` INTEGER NOT NULL, `segmentId` INTEGER NOT NULL, PRIMARY KEY(`eventId`, `segmentId`), FOREIGN KEY(`eventId`) REFERENCES `events`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`segmentId`) REFERENCES `video_segments`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "eventId",
+            "columnName": "eventId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "segmentId",
+            "columnName": "segmentId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "eventId",
+            "segmentId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_event_video_segments_eventId",
+            "unique": false,
+            "columnNames": [
+              "eventId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_event_video_segments_eventId` ON `${TABLE_NAME}` (`eventId`)"
+          },
+          {
+            "name": "index_event_video_segments_segmentId",
+            "unique": false,
+            "columnNames": [
+              "segmentId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_event_video_segments_segmentId` ON `${TABLE_NAME}` (`segmentId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "events",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "eventId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "video_segments",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "segmentId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "cloud_upload_tasks",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `localFileId` INTEGER, `localPath` TEXT, `contentUri` TEXT, `destination` TEXT NOT NULL, `remoteFolderId` TEXT, `remoteFileId` TEXT, `type` TEXT NOT NULL, `priority` INTEGER NOT NULL, `status` TEXT NOT NULL, `sizeBytes` INTEGER NOT NULL, `uploadedBytes` INTEGER NOT NULL, `retryCount` INTEGER NOT NULL, `lastError` TEXT, `requiresWifi` INTEGER NOT NULL, `allowMobileData` INTEGER NOT NULL, `checksum` TEXT, `checksumVerified` INTEGER NOT NULL, `simulated` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, `completedAt` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "localFileId",
+            "columnName": "localFileId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "localPath",
+            "columnName": "localPath",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contentUri",
+            "columnName": "contentUri",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "destination",
+            "columnName": "destination",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remoteFolderId",
+            "columnName": "remoteFolderId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "remoteFileId",
+            "columnName": "remoteFileId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priority",
+            "columnName": "priority",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sizeBytes",
+            "columnName": "sizeBytes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "uploadedBytes",
+            "columnName": "uploadedBytes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "retryCount",
+            "columnName": "retryCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastError",
+            "columnName": "lastError",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "requiresWifi",
+            "columnName": "requiresWifi",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "allowMobileData",
+            "columnName": "allowMobileData",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "checksum",
+            "columnName": "checksum",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "checksumVerified",
+            "columnName": "checksumVerified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "simulated",
+            "columnName": "simulated",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completedAt",
+            "columnName": "completedAt",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_cloud_upload_tasks_localFileId",
+            "unique": false,
+            "columnNames": [
+              "localFileId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_cloud_upload_tasks_localFileId` ON `${TABLE_NAME}` (`localFileId`)"
+          },
+          {
+            "name": "index_cloud_upload_tasks_status",
+            "unique": false,
+            "columnNames": [
+              "status"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_cloud_upload_tasks_status` ON `${TABLE_NAME}` (`status`)"
+          },
+          {
+            "name": "index_cloud_upload_tasks_localPath_destination_type",
+            "unique": true,
+            "columnNames": [
+              "localPath",
+              "destination",
+              "type"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_cloud_upload_tasks_localPath_destination_type` ON `${TABLE_NAME}` (`localPath`, `destination`, `type`)"
+          }
+        ]
+      },
+      {
+        "tableName": "cloud_accounts",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `provider` TEXT NOT NULL, `accountName` TEXT, `accountHash` TEXT, `connected` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, `lastAuthError` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "provider",
+            "columnName": "provider",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "accountName",
+            "columnName": "accountName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "accountHash",
+            "columnName": "accountHash",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "connected",
+            "columnName": "connected",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastAuthError",
+            "columnName": "lastAuthError",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_cloud_accounts_provider",
+            "unique": true,
+            "columnNames": [
+              "provider"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_cloud_accounts_provider` ON `${TABLE_NAME}` (`provider`)"
+          }
+        ]
+      },
+      {
+        "tableName": "cloud_folders",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `provider` TEXT NOT NULL, `path` TEXT NOT NULL, `remoteFolderId` TEXT, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "provider",
+            "columnName": "provider",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "path",
+            "columnName": "path",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remoteFolderId",
+            "columnName": "remoteFolderId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_cloud_folders_provider_path",
+            "unique": true,
+            "columnNames": [
+              "provider",
+              "path"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_cloud_folders_provider_path` ON `${TABLE_NAME}` (`provider`, `path`)"
+          }
+        ]
+      },
+      {
+        "tableName": "traffic_usage",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `yearMonth` INTEGER NOT NULL, `wifiBytes` INTEGER NOT NULL, `mobileBytes` INTEGER NOT NULL, `monthlyLimitBytes` INTEGER NOT NULL, `resetDay` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "yearMonth",
+            "columnName": "yearMonth",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wifiBytes",
+            "columnName": "wifiBytes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mobileBytes",
+            "columnName": "mobileBytes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "monthlyLimitBytes",
+            "columnName": "monthlyLimitBytes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "resetDay",
+            "columnName": "resetDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "cloud_errors",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `taskId` INTEGER, `category` TEXT NOT NULL, `message` TEXT NOT NULL, `retryable` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taskId",
+            "columnName": "taskId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "category",
+            "columnName": "category",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "message",
+            "columnName": "message",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "retryable",
+            "columnName": "retryable",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_cloud_errors_taskId",
+            "unique": false,
+            "columnNames": [
+              "taskId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_cloud_errors_taskId` ON `${TABLE_NAME}` (`taskId`)"
+          },
+          {
+            "name": "index_cloud_errors_createdAt",
+            "unique": false,
+            "columnNames": [
+              "createdAt"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_cloud_errors_createdAt` ON `${TABLE_NAME}` (`createdAt`)"
+          }
+        ]
+      },
+      {
+        "tableName": "error_logs",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timestamp` INTEGER NOT NULL, `module` TEXT NOT NULL, `errorType` TEXT NOT NULL, `severity` TEXT NOT NULL, `message` TEXT NOT NULL, `stackTrace` TEXT, `tripId` INTEGER, `segmentId` INTEGER, `eventId` INTEGER, `recovered` INTEGER NOT NULL, `userVisible` INTEGER NOT NULL, `appVersion` TEXT NOT NULL, `androidVersion` TEXT NOT NULL, `deviceModel` TEXT NOT NULL, `simulated` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "module",
+            "columnName": "module",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "errorType",
+            "columnName": "errorType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "severity",
+            "columnName": "severity",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "message",
+            "columnName": "message",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stackTrace",
+            "columnName": "stackTrace",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "tripId",
+            "columnName": "tripId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "segmentId",
+            "columnName": "segmentId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "eventId",
+            "columnName": "eventId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "recovered",
+            "columnName": "recovered",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userVisible",
+            "columnName": "userVisible",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appVersion",
+            "columnName": "appVersion",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "androidVersion",
+            "columnName": "androidVersion",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "deviceModel",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "simulated",
+            "columnName": "simulated",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_error_logs_timestamp",
+            "unique": false,
+            "columnNames": [
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_error_logs_timestamp` ON `${TABLE_NAME}` (`timestamp`)"
+          },
+          {
+            "name": "index_error_logs_module",
+            "unique": false,
+            "columnNames": [
+              "module"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_error_logs_module` ON `${TABLE_NAME}` (`module`)"
+          },
+          {
+            "name": "index_error_logs_severity",
+            "unique": false,
+            "columnNames": [
+              "severity"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_error_logs_severity` ON `${TABLE_NAME}` (`severity`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '75db5835dd16a4167d74544ddd56b4de')"
+    ]
+  }
+}

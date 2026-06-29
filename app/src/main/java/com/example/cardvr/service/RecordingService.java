@@ -73,6 +73,7 @@ import com.example.cardvr.sensors.SensorController;
 import com.example.cardvr.sensors.SensorDataFilter;
 import com.example.cardvr.sensors.SensorSample;
 import com.example.cardvr.sensors.SensorSnapshotProvider;
+import com.example.cardvr.recovery.SafeShutdownManager;
 import com.example.cardvr.trips.TripManager;
 import com.example.cardvr.trips.TripRepository;
 import com.example.cardvr.trips.TripState;
@@ -131,6 +132,7 @@ public final class RecordingService extends Service implements
     };
 
     private RecordingStateManager stateManager;
+    private final SafeShutdownManager safeShutdownManager = new SafeShutdownManager();
     private ChargingStateManager chargingStateManager;
     private BatteryMonitor batteryMonitor;
     private RecordingNotificationManager notificationManager;
@@ -453,7 +455,7 @@ public final class RecordingService extends Service implements
     }
 
     private void requestStop() {
-        if (stopping || finishing) {
+        if (stopping || finishing || !safeShutdownManager.begin()) {
             return;
         }
         stopping = true;

@@ -38,6 +38,7 @@ import com.example.cardvr.power.ChargingStateManager;
 import com.example.cardvr.recording.RecordingStateManager;
 import com.example.cardvr.recording.RecordingRecoveryManager;
 import com.example.cardvr.recording.SegmentRepository;
+import com.example.cardvr.recovery.RecoveryManager;
 import com.example.cardvr.service.RecordingNotificationManager;
 import com.example.cardvr.service.RecordingService;
 import com.example.cardvr.trips.TripState;
@@ -130,9 +131,13 @@ public final class MainActivity extends AppCompatActivity implements
 
         bindViews();
         configureWindowInsets();
-        SegmentRepository recoveryRepository = new SegmentRepository(this);
-        SegmentRepository.ioExecutor().execute(
-                () -> new RecordingRecoveryManager(recoveryRepository).recover());
+        SegmentRepository.ioExecutor().execute(() -> {
+            RecoveryManager.Result result = new RecoveryManager(this).recover();
+            if (result.activeTripFound || result.recoveredSegments > 0
+                    || result.missingSegments > 0) {
+                runOnUiThread(() -> Toast.makeText(this, result.message, Toast.LENGTH_LONG).show());
+            }
+        });
         stateManager = RecordingStateManager.getInstance();
         chargingStateManager = ChargingStateManager.getInstance();
         batteryMonitor = new BatteryMonitor(this);

@@ -1,7 +1,6 @@
 package com.example.cardvr.storage;
 
 import android.content.Context;
-import android.os.Environment;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,24 +11,18 @@ import java.util.UUID;
 
 public final class FileManager {
 
-    private static final String VIDEO_DIRECTORY = "CarDvr";
     private static final String FILE_PREFIX = "DASHCAM_";
     private static final String FILE_EXTENSION = ".mp4";
     private static final String DATE_PATTERN = "yyyy-MM-dd_HH-mm-ss";
 
-    private final Context appContext;
+    private final StorageLocationManager storageLocationManager;
 
     public FileManager(Context context) {
-        appContext = context.getApplicationContext();
+        storageLocationManager = new StorageLocationManager(context);
     }
 
     public File createVideoFile() throws IOException {
-        File baseDirectory = appContext.getExternalFilesDir(Environment.DIRECTORY_MOVIES);
-        if (baseDirectory == null) {
-            baseDirectory = new File(appContext.getFilesDir(), "videos");
-        }
-
-        File videoDirectory = new File(baseDirectory, VIDEO_DIRECTORY);
+        File videoDirectory = storageLocationManager.getVideoDirectory();
         if (!videoDirectory.exists() && !videoDirectory.mkdirs()) {
             throw new IOException("Не удалось создать папку для видео: "
                     + videoDirectory.getAbsolutePath());

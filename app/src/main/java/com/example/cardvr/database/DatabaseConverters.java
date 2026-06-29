@@ -102,4 +102,14 @@ public final class DatabaseConverters {
     public static CloudDestination toCloudDestination(String value) {
         return value == null ? null : CloudDestination.valueOf(value);
     }
+
+    @TypeConverter
+    public static String fromErrorSeverity(ErrorSeverity value) {
+        return value == null ? null : value.name();
+    }
+
+    @TypeConverter
+    public static ErrorSeverity toErrorSeverity(String value) {
+        return value == null ? null : ErrorSeverity.valueOf(value);
+    }
 }

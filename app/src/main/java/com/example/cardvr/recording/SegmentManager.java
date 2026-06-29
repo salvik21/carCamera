@@ -14,6 +14,7 @@ import com.example.cardvr.database.VideoSegmentEntity;
 import com.example.cardvr.location.VideoMetadataProvider;
 import com.example.cardvr.location.VideoMetadataSnapshot;
 import com.example.cardvr.protection.ProtectionManager;
+import com.example.cardvr.recovery.RecordingStateJournal;
 import com.example.cardvr.settings.SettingsRepository;
 import com.example.cardvr.storage.FileCleanupManager;
 import com.example.cardvr.storage.FileManager;
@@ -37,6 +38,7 @@ public final class SegmentManager implements SegmentRecorder.Listener {
     private final StorageLimitManager limits;
     private final FileCleanupManager cleanup;
     private final ProtectionManager protection;
+    private final RecordingStateJournal journal;
     private final SegmentRecorder recorder;
     private final Listener listener;
 
@@ -57,7 +59,15 @@ public final class SegmentManager implements SegmentRecorder.Listener {
     }
 
     public void onMetadata(VideoMetadataSnapshot snapshot) {
-        if (snapshot != null) segmentMaxSpeed = Math.max(segmentMaxSpeed, snapshot.speedKmh);
+        if (snapshot != null) {
+            segmentMaxSpeed = Math.max(segmentMaxSpeed, snapshot.speedKmh);
+            VideoSegmentEntity active = current;
+            if (active != null) {
+                journal.update(active.tripId, active.id, active.startTime, active.filePath,
+                        cameraId, snapshot.latitude + "," + snapshot.longitude
+                                + "@" + snapshot.accuracy, false);
+            }
+        }
     }
 
     public SegmentManager(Context context, SegmentRepository repository,
@@ -70,6 +80,7 @@ public final class SegmentManager implements SegmentRecorder.Listener {
         this.cleanup = cleanup;
         this.protection = protection;
         this.listener = listener;
+        journal = new RecordingStateJournal(context);
         files = new FileManager(context);
         recorder = new SegmentRecorder(context, this);
     }
@@ -141,6 +152,8 @@ public final class SegmentManager implements SegmentRecorder.Listener {
                 segmentMaxSpeed = startMetadata == null ? 0 : startMetadata.speedKmh;
                 current = entity;
                 protection.onSegmentCreated(entity.id);
+                journal.update(entity.tripId, entity.id, entity.startTime,
+                        entity.filePath, cameraId, null, false);
                 main.post(() -> {
                     if (!sessionActive || stopRequested) return;
                     try {
@@ -228,6 +241,7 @@ public final class SegmentManager implements SegmentRecorder.Listener {
 
     private void finishSession() {
         sessionActive = false;
+        journal.clear();
         listener.onSessionStopped(lastFile);
     }
 

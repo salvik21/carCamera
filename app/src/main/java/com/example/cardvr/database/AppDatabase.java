@@ -14,7 +14,8 @@ import androidx.annotation.NonNull;
         LocationPointEntity.class, EventEntity.class,
         EventVideoSegmentCrossRef.class, CloudUploadTaskEntity.class,
         CloudAccountEntity.class, CloudFolderEntity.class,
-        TrafficUsageEntity.class, CloudErrorEntity.class}, version = 4, exportSchema = true)
+        TrafficUsageEntity.class, CloudErrorEntity.class,
+        ErrorLogEntity.class}, version = 5, exportSchema = true)
 @TypeConverters(DatabaseConverters.class)
 public abstract class AppDatabase extends RoomDatabase {
     private static volatile AppDatabase instance;
@@ -24,6 +25,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract LocationPointDao locationPointDao();
     public abstract EventDao eventDao();
     public abstract CloudUploadDao cloudUploadDao();
+    public abstract ErrorLogDao errorLogDao();
 
     public static final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override
@@ -84,6 +86,16 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    public static final Migration MIGRATION_4_5 = new Migration(4, 5) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS error_logs (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, timestamp INTEGER NOT NULL, module TEXT NOT NULL, errorType TEXT NOT NULL, severity TEXT NOT NULL, message TEXT NOT NULL, stackTrace TEXT, tripId INTEGER, segmentId INTEGER, eventId INTEGER, recovered INTEGER NOT NULL, userVisible INTEGER NOT NULL, appVersion TEXT NOT NULL, androidVersion TEXT NOT NULL, deviceModel TEXT NOT NULL, simulated INTEGER NOT NULL)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_error_logs_timestamp ON error_logs(timestamp)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_error_logs_module ON error_logs(module)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_error_logs_severity ON error_logs(severity)");
+        }
+    };
+
     public static AppDatabase getInstance(Context context) {
         if (instance == null) {
             synchronized (AppDatabase.class) {
@@ -91,7 +103,7 @@ public abstract class AppDatabase extends RoomDatabase {
                     instance = Room.databaseBuilder(context.getApplicationContext(),
                             AppDatabase.class, "car-dvr.db")
                             .addMigrations(MIGRATION_1_2, MIGRATION_2_3,
-                                    MIGRATION_3_4)
+                                    MIGRATION_3_4, MIGRATION_4_5)
                             .build();
                 }
             }

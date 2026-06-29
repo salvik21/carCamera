@@ -24,6 +24,7 @@ import com.example.cardvr.sensors.DetectionSettingsRepository;
 import com.example.cardvr.sensors.SensorFrequency;
 import com.example.cardvr.service.RecordingService;
 import com.example.cardvr.settings.SettingsRepository;
+import com.example.cardvr.storage.StorageLocationManager;
 
 public final class SettingsActivity extends AppCompatActivity {
     private static final String UI_PREFS = "recorder_ui_settings";
@@ -41,6 +42,7 @@ public final class SettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         SettingsRepository settings = new SettingsRepository(this);
+        StorageLocationManager storageLocationManager = new StorageLocationManager(this);
         DetectionSettingsRepository detectionRepository = new DetectionSettingsRepository(this);
         DetectionSettings detectionSettings = detectionRepository.get();
         LinearLayout root = column();
@@ -53,6 +55,18 @@ public final class SettingsActivity extends AppCompatActivity {
                 getResources().getStringArray(R.array.preview_auto_off_options));
         previewAutoOff.setSelection(getSharedPreferences(UI_PREFS, MODE_PRIVATE)
                 .getInt(PREF_AUTO_OFF_POSITION, 4));
+        section(root, "Хранилище записей");
+        boolean sdCardAvailable = storageLocationManager.hasSdCard();
+        Spinner storageLocation = spinner(root, "Куда сохранять записи",
+                sdCardAvailable
+                        ? new String[]{"Память телефона", "SD-карта"}
+                        : new String[]{"Память телефона"});
+        storageLocation.setSelection(sdCardAvailable
+                && settings.getStorageLocation() == SettingsRepository.STORAGE_LOCATION_SD_CARD ? 1 : 0);
+        TextView storagePath = new TextView(this);
+        storagePath.setText("Текущая папка: "
+                + storageLocationManager.getVideoDirectory().getAbsolutePath());
+        root.addView(storagePath);
         Spinner duration = spinner(root, R.string.segment_duration,
                 new String[]{"30 секунд", "1 минута", "3 минуты", "5 минут"});
         duration.setSelection(indexOf(DURATIONS, settings.getSegmentDurationMs()));
@@ -137,6 +151,10 @@ public final class SettingsActivity extends AppCompatActivity {
         testCrash.setText("Создать тестовую аварию");
         root.addView(testCrash);
         testCrash.setOnClickListener(v -> simulate(RecordingService.ACTION_SIMULATE_CRASH));
+        Button diagnostics = new Button(this);
+        diagnostics.setText("Диагностика и проверка готовности");
+        root.addView(diagnostics);
+        diagnostics.setOnClickListener(v -> startActivity(new Intent(this, DiagnosticActivity.class)));
         Button save = new Button(this);
         save.setText(R.string.save);
         root.addView(save);
@@ -156,6 +174,9 @@ public final class SettingsActivity extends AppCompatActivity {
                 settings.setTripStartMode(startMode.getSelectedItemPosition());
                 settings.setPowerEndDelayMs(POWER_DELAYS[powerEnd.getSelectedItemPosition()]);
                 settings.setStopEndDelayMs(STOP_DELAYS[stopEnd.getSelectedItemPosition()]);
+                settings.setStorageLocation(storageLocation.getSelectedItemPosition() == 1
+                        ? SettingsRepository.STORAGE_LOCATION_SD_CARD
+                        : SettingsRepository.STORAGE_LOCATION_PHONE);
                 DetectionSettings newDetectionSettings = detectionRepository.get();
                 newDetectionSettings.brakingSensitivity = DetectionSensitivity.values()[
                         brakingSensitivity.getSelectedItemPosition()];

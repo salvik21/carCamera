@@ -16,6 +16,9 @@ public final class SettingsRepository {
     private static final String TRIP_START_MODE = "trip_start_mode";
     private static final String POWER_END_DELAY = "power_end_delay_ms";
     private static final String STOP_END_DELAY = "stop_end_delay_ms";
+    private static final String STORAGE_LOCATION = "storage_location";
+    public static final int STORAGE_LOCATION_PHONE = 0;
+    public static final int STORAGE_LOCATION_SD_CARD = 1;
     public static final long GIB = 1024L * 1024L * 1024L;
 
     private final SharedPreferences preferences;
@@ -72,4 +75,9 @@ public final class SettingsRepository {
     public void setPowerEndDelayMs(long value) { preferences.edit().putLong(POWER_END_DELAY, value).apply(); }
     public long getStopEndDelayMs() { return preferences.getLong(STOP_END_DELAY, -1L); }
     public void setStopEndDelayMs(long value) { preferences.edit().putLong(STOP_END_DELAY, value).apply(); }
+    public int getStorageLocation() { return preferences.getInt(STORAGE_LOCATION, STORAGE_LOCATION_PHONE); }
+    public void setStorageLocation(int value) {
+        int normalized = value == STORAGE_LOCATION_SD_CARD ? STORAGE_LOCATION_SD_CARD : STORAGE_LOCATION_PHONE;
+        preferences.edit().putInt(STORAGE_LOCATION, normalized).apply();
+    }
 }

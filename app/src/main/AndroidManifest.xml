@@ -43,6 +43,7 @@
         <activity android:name=".ui.TripSummaryActivity" android:exported="false" />
         <activity android:name=".ui.EventsActivity" android:exported="false" />
         <activity android:name=".ui.CloudActivity" android:exported="false" />
+        <activity android:name=".ui.DiagnosticActivity" android:exported="false" />
         <activity
             android:name=".ui.EmergencyActivity"
             android:exported="false"
