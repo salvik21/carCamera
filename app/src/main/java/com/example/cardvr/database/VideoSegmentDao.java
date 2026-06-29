@@ -64,4 +64,10 @@ public interface VideoSegmentDao {
 
     @Query("SELECT * FROM video_segments WHERE startTime <= :untilTime AND (endTime IS NULL OR endTime >= :fromTime)")
     List<VideoSegmentEntity> getSegmentsOverlapping(long fromTime, long untilTime);
+
+    @Query("UPDATE video_segments SET cloudStatus=:status, remoteFileId=:remoteFileId, cloudChecksum=:checksum, cloudUploadedAt=:uploadedAt WHERE id=:id")
+    void updateCloudResult(long id, CloudStatus status, String remoteFileId, String checksum, Long uploadedAt);
+
+    @Query("UPDATE video_segments SET cloudStatus=:status WHERE id=:id")
+    void setCloudStatus(long id, CloudStatus status);
 }

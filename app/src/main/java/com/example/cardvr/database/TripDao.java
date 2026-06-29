@@ -21,4 +21,7 @@ public interface TripDao {
     TripEntity getLatestCompleted();
     @Query("UPDATE trips SET status=:status, endTime=:endTime WHERE id=:id")
     void finish(long id, TripStatus status, long endTime);
+
+    @Query("UPDATE trips SET cloudStatus=:status, remoteFolderId=:remoteFolderId, fullTripUploadRequested=:requested, fullTripUploadedAt=:uploadedAt WHERE id=:id")
+    void updateCloudResult(long id, CloudStatus status, String remoteFolderId, boolean requested, Long uploadedAt);
 }

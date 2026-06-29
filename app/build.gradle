@@ -44,8 +44,10 @@ dependencies {
     implementation "androidx.camera:camera-view:${cameraxVersion}"
     implementation "androidx.recyclerview:recyclerview:1.4.0"
     implementation "androidx.lifecycle:lifecycle-livedata:2.9.1"
+    implementation "androidx.work:work-runtime:2.10.1"
     implementation "androidx.room:room-runtime:2.7.2"
     annotationProcessor "androidx.room:room-compiler:2.7.2"
     implementation "com.google.android.gms:play-services-location:21.3.0"
+    implementation "com.google.android.gms:play-services-auth:21.3.0"
     testImplementation "junit:junit:4.13.2"
 }

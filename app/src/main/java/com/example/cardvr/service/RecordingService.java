@@ -48,6 +48,7 @@ import com.example.cardvr.database.EventEntity;
 import com.example.cardvr.database.EventSeverity;
 import com.example.cardvr.database.EventStatus;
 import com.example.cardvr.database.EventType;
+import com.example.cardvr.cloud.UploadQueueManager;
 import com.example.cardvr.database.TripEntity;
 import com.example.cardvr.database.TripStatus;
 import com.example.cardvr.events.BrakingDetector;
@@ -744,6 +745,12 @@ public final class RecordingService extends Service implements
             if (protectedCount > 0) {
                 event.status = EventStatus.PROTECTED;
                 eventRepository.update(event);
+            }
+            UploadQueueManager queue = new UploadQueueManager(this);
+            if (queue.shouldAutoUpload(event)) {
+                queue.enqueueEventJson(event,
+                        stateManager.getCurrentState().getBatteryPercent(),
+                        stateManager.getCurrentState().isCharging());
             }
             eventNotificationManager.notifyEvent(event);
         });

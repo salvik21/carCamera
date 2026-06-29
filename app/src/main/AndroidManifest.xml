@@ -12,6 +12,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <uses-feature
         android:name="android.hardware.camera.any"
@@ -40,6 +42,7 @@
         <activity android:name=".ui.RecordingsActivity" android:exported="false" />
         <activity android:name=".ui.TripSummaryActivity" android:exported="false" />
         <activity android:name=".ui.EventsActivity" android:exported="false" />
+        <activity android:name=".ui.CloudActivity" android:exported="false" />
         <activity
             android:name=".ui.EmergencyActivity"
             android:exported="false"

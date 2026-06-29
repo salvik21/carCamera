@@ -27,5 +27,9 @@ public class TripEntity {
     public int hardBrakingCount;
     public int impactCount;
     public int possibleCrashCount;
+    @NonNull public CloudStatus cloudStatus = CloudStatus.NONE;
+    @Nullable public String remoteFolderId;
+    public boolean fullTripUploadRequested;
+    @Nullable public Long fullTripUploadedAt;
     public long createdAt;
 }

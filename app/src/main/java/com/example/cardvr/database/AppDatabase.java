@@ -12,7 +12,9 @@ import androidx.annotation.NonNull;
 
 @Database(entities = {VideoSegmentEntity.class, TripEntity.class,
         LocationPointEntity.class, EventEntity.class,
-        EventVideoSegmentCrossRef.class}, version = 3, exportSchema = true)
+        EventVideoSegmentCrossRef.class, CloudUploadTaskEntity.class,
+        CloudAccountEntity.class, CloudFolderEntity.class,
+        TrafficUsageEntity.class, CloudErrorEntity.class}, version = 4, exportSchema = true)
 @TypeConverters(DatabaseConverters.class)
 public abstract class AppDatabase extends RoomDatabase {
     private static volatile AppDatabase instance;
@@ -21,6 +23,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract TripDao tripDao();
     public abstract LocationPointDao locationPointDao();
     public abstract EventDao eventDao();
+    public abstract CloudUploadDao cloudUploadDao();
 
     public static final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override
@@ -55,13 +58,40 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    public static final Migration MIGRATION_3_4 = new Migration(3, 4) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("ALTER TABLE video_segments ADD COLUMN cloudStatus TEXT NOT NULL DEFAULT 'NONE'");
+            db.execSQL("ALTER TABLE video_segments ADD COLUMN remoteFileId TEXT");
+            db.execSQL("ALTER TABLE video_segments ADD COLUMN cloudChecksum TEXT");
+            db.execSQL("ALTER TABLE video_segments ADD COLUMN cloudUploadedAt INTEGER");
+            db.execSQL("ALTER TABLE trips ADD COLUMN cloudStatus TEXT NOT NULL DEFAULT 'NONE'");
+            db.execSQL("ALTER TABLE trips ADD COLUMN remoteFolderId TEXT");
+            db.execSQL("ALTER TABLE trips ADD COLUMN fullTripUploadRequested INTEGER NOT NULL DEFAULT 0");
+            db.execSQL("ALTER TABLE trips ADD COLUMN fullTripUploadedAt INTEGER");
+            db.execSQL("CREATE TABLE IF NOT EXISTS cloud_accounts (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, provider TEXT NOT NULL, accountName TEXT, accountHash TEXT, connected INTEGER NOT NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NOT NULL, lastAuthError TEXT)");
+            db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_cloud_accounts_provider ON cloud_accounts(provider)");
+            db.execSQL("CREATE TABLE IF NOT EXISTS cloud_folders (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, provider TEXT NOT NULL, path TEXT NOT NULL, remoteFolderId TEXT, createdAt INTEGER NOT NULL, updatedAt INTEGER NOT NULL)");
+            db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_cloud_folders_provider_path ON cloud_folders(provider,path)");
+            db.execSQL("CREATE TABLE IF NOT EXISTS cloud_upload_tasks (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, localFileId INTEGER, localPath TEXT, contentUri TEXT, destination TEXT NOT NULL, remoteFolderId TEXT, remoteFileId TEXT, type TEXT NOT NULL, priority INTEGER NOT NULL, status TEXT NOT NULL, sizeBytes INTEGER NOT NULL, uploadedBytes INTEGER NOT NULL, retryCount INTEGER NOT NULL, lastError TEXT, requiresWifi INTEGER NOT NULL, allowMobileData INTEGER NOT NULL, checksum TEXT, checksumVerified INTEGER NOT NULL, simulated INTEGER NOT NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NOT NULL, completedAt INTEGER)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_cloud_upload_tasks_localFileId ON cloud_upload_tasks(localFileId)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_cloud_upload_tasks_status ON cloud_upload_tasks(status)");
+            db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_cloud_upload_tasks_localPath_destination_type ON cloud_upload_tasks(localPath,destination,type)");
+            db.execSQL("CREATE TABLE IF NOT EXISTS traffic_usage (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, yearMonth INTEGER NOT NULL, wifiBytes INTEGER NOT NULL, mobileBytes INTEGER NOT NULL, monthlyLimitBytes INTEGER NOT NULL, resetDay INTEGER NOT NULL, updatedAt INTEGER NOT NULL)");
+            db.execSQL("CREATE TABLE IF NOT EXISTS cloud_errors (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, taskId INTEGER, category TEXT NOT NULL, message TEXT NOT NULL, retryable INTEGER NOT NULL, createdAt INTEGER NOT NULL)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_cloud_errors_taskId ON cloud_errors(taskId)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_cloud_errors_createdAt ON cloud_errors(createdAt)");
+        }
+    };
+
     public static AppDatabase getInstance(Context context) {
         if (instance == null) {
             synchronized (AppDatabase.class) {
                 if (instance == null) {
                     instance = Room.databaseBuilder(context.getApplicationContext(),
                             AppDatabase.class, "car-dvr.db")
-                            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                            .addMigrations(MIGRATION_1_2, MIGRATION_2_3,
+                                    MIGRATION_3_4)
                             .build();
                 }
             }

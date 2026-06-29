@@ -32,8 +32,8 @@ public final class TripSummaryActivity extends AppCompatActivity {
                 new Intent(this, RecordingsActivity.class)));
         root.addView(recordings);
         Button cloud = new Button(this);
-        cloud.setText(R.string.cloud_later);
-        cloud.setEnabled(false);
+        cloud.setText("Открыть Google Drive и очередь загрузки");
+        cloud.setOnClickListener(v -> startActivity(new Intent(this, CloudActivity.class)));
         root.addView(cloud);
         Button close = new Button(this);
         close.setText(android.R.string.ok);

@@ -30,4 +30,8 @@ public class VideoSegmentEntity {
     @Nullable public Double endLatitude;
     @Nullable public Double endLongitude;
     public double maxSpeedKmh;
+    @NonNull public CloudStatus cloudStatus = CloudStatus.NONE;
+    @Nullable public String remoteFileId;
+    @Nullable public String cloudChecksum;
+    @Nullable public Long cloudUploadedAt;
 }
