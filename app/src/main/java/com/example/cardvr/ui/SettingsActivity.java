@@ -1,6 +1,7 @@
 package com.example.cardvr.ui;
 
 import android.os.Bundle;
+import android.content.Intent;
 import android.text.InputType;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -17,6 +18,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.CameraSelector;
 
 import com.example.cardvr.R;
+import com.example.cardvr.sensors.DetectionSensitivity;
+import com.example.cardvr.sensors.DetectionSettings;
+import com.example.cardvr.sensors.DetectionSettingsRepository;
+import com.example.cardvr.sensors.SensorFrequency;
+import com.example.cardvr.service.RecordingService;
 import com.example.cardvr.settings.SettingsRepository;
 
 public final class SettingsActivity extends AppCompatActivity {
@@ -35,6 +41,8 @@ public final class SettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         SettingsRepository settings = new SettingsRepository(this);
+        DetectionSettingsRepository detectionRepository = new DetectionSettingsRepository(this);
+        DetectionSettings detectionSettings = detectionRepository.get();
         LinearLayout root = column();
         Spinner camera = spinner(root, R.string.camera_setting,
                 new String[]{getString(R.string.camera_back), getString(R.string.camera_front)});
@@ -81,6 +89,54 @@ public final class SettingsActivity extends AppCompatActivity {
         Spinner stopEnd = spinner(root, R.string.stop_end_delay,
                 new String[]{"5 минут", "10 минут", "15 минут", "30 минут", "Не завершать"});
         stopEnd.setSelection(indexOf(STOP_DELAYS, settings.getStopEndDelayMs()));
+        section(root, "Датчики и аварийные события");
+        Spinner brakingSensitivity = spinner(root, "Резкое торможение",
+                new String[]{"Низкая", "Средняя", "Высокая", "Пользовательская"});
+        brakingSensitivity.setSelection(detectionSettings.brakingSensitivity.ordinal());
+        Spinner impactSensitivity = spinner(root, "Удар",
+                new String[]{"Низкая", "Средняя", "Высокая", "Пользовательская"});
+        impactSensitivity.setSelection(detectionSettings.impactSensitivity.ordinal());
+        Spinner crashSensitivity = spinner(root, "Возможная авария",
+                new String[]{"Низкая", "Средняя", "Высокая", "Пользовательская"});
+        crashSensitivity.setSelection(detectionSettings.crashSensitivity.ordinal());
+        Spinner phoneMoveSensitivity = spinner(root, "Изменение положения телефона",
+                new String[]{"Низкая", "Средняя", "Высокая", "Пользовательская"});
+        phoneMoveSensitivity.setSelection(detectionSettings.phoneMoveSensitivity.ordinal());
+        Spinner sensorFrequency = spinner(root, "Частота датчиков",
+                new String[]{"Экономная", "Стандартная", "Высокая"});
+        sensorFrequency.setSelection(detectionSettings.sensorFrequency.ordinal());
+        Button calibrate = new Button(this);
+        calibrate.setText("Калибровать положение телефона");
+        root.addView(calibrate);
+        calibrate.setOnClickListener(v -> {
+            startService(new Intent(this, RecordingService.class)
+                    .setAction(RecordingService.ACTION_CALIBRATE_SENSORS));
+            Toast.makeText(this,
+                    "Калибровка отправлена в работающий сервис записи",
+                    Toast.LENGTH_LONG).show();
+        });
+        Button restoreRecommended = new Button(this);
+        restoreRecommended.setText("Восстановить рекомендуемые значения");
+        root.addView(restoreRecommended);
+        restoreRecommended.setOnClickListener(v -> {
+            detectionRepository.restoreRecommended();
+            Toast.makeText(this, "Рекомендованные значения восстановлены",
+                    Toast.LENGTH_SHORT).show();
+            recreate();
+        });
+        section(root, "Тестовый режим");
+        Button testBrake = new Button(this);
+        testBrake.setText("Создать тестовое резкое торможение");
+        root.addView(testBrake);
+        testBrake.setOnClickListener(v -> simulate(RecordingService.ACTION_SIMULATE_HARD_BRAKING));
+        Button testImpact = new Button(this);
+        testImpact.setText("Создать тестовый удар");
+        root.addView(testImpact);
+        testImpact.setOnClickListener(v -> simulate(RecordingService.ACTION_SIMULATE_IMPACT));
+        Button testCrash = new Button(this);
+        testCrash.setText("Создать тестовую аварию");
+        root.addView(testCrash);
+        testCrash.setOnClickListener(v -> simulate(RecordingService.ACTION_SIMULATE_CRASH));
         Button save = new Button(this);
         save.setText(R.string.save);
         root.addView(save);
@@ -100,6 +156,18 @@ public final class SettingsActivity extends AppCompatActivity {
                 settings.setTripStartMode(startMode.getSelectedItemPosition());
                 settings.setPowerEndDelayMs(POWER_DELAYS[powerEnd.getSelectedItemPosition()]);
                 settings.setStopEndDelayMs(STOP_DELAYS[stopEnd.getSelectedItemPosition()]);
+                DetectionSettings newDetectionSettings = detectionRepository.get();
+                newDetectionSettings.brakingSensitivity = DetectionSensitivity.values()[
+                        brakingSensitivity.getSelectedItemPosition()];
+                newDetectionSettings.impactSensitivity = DetectionSensitivity.values()[
+                        impactSensitivity.getSelectedItemPosition()];
+                newDetectionSettings.crashSensitivity = DetectionSensitivity.values()[
+                        crashSensitivity.getSelectedItemPosition()];
+                newDetectionSettings.phoneMoveSensitivity = DetectionSensitivity.values()[
+                        phoneMoveSensitivity.getSelectedItemPosition()];
+                newDetectionSettings.sensorFrequency = SensorFrequency.values()[
+                        sensorFrequency.getSelectedItemPosition()];
+                detectionRepository.save(newDetectionSettings);
                 getSharedPreferences(UI_PREFS, MODE_PRIVATE).edit()
                         .putInt(PREF_LENS_FACING,
                                 camera.getSelectedItemPosition() == 1
@@ -137,6 +205,30 @@ public final class SettingsActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_dropdown_item, values));
         root.addView(spinner, new ViewGroup.LayoutParams(-1, -2));
         return spinner;
+    }
+
+    private Spinner spinner(LinearLayout root, String label, String[] values) {
+        TextView title = new TextView(this);
+        title.setText(label);
+        root.addView(title);
+        Spinner spinner = new Spinner(this);
+        spinner.setAdapter(new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_dropdown_item, values));
+        root.addView(spinner, new ViewGroup.LayoutParams(-1, -2));
+        return spinner;
+    }
+
+    private void section(LinearLayout root, String titleText) {
+        TextView title = new TextView(this);
+        title.setText(titleText);
+        title.setTextSize(18);
+        title.setPadding(0, 24, 0, 8);
+        root.addView(title);
+    }
+
+    private void simulate(String action) {
+        startService(new Intent(this, RecordingService.class).setAction(action));
+        Toast.makeText(this, "Тестовое событие создано", Toast.LENGTH_SHORT).show();
     }
 
     private EditText number(LinearLayout root) {

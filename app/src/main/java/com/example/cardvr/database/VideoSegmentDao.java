@@ -61,4 +61,7 @@ public interface VideoSegmentDao {
 
     @Query("SELECT COALESCE(SUM(sizeBytes),0) FROM video_segments WHERE tripId=:tripId")
     long sizeForTrip(long tripId);
+
+    @Query("SELECT * FROM video_segments WHERE startTime <= :untilTime AND (endTime IS NULL OR endTime >= :fromTime)")
+    List<VideoSegmentEntity> getSegmentsOverlapping(long fromTime, long untilTime);
 }

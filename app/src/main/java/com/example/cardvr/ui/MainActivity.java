@@ -250,6 +250,8 @@ public final class MainActivity extends AppCompatActivity implements
                 startActivity(new Intent(this, RecordingsActivity.class)));
         findViewById(R.id.storageSettingsButton).setOnClickListener(view ->
                 startActivity(new Intent(this, SettingsActivity.class)));
+        findViewById(R.id.eventsButton).setOnClickListener(view ->
+                startActivity(new Intent(this, EventsActivity.class)));
 
     }
 
@@ -419,6 +421,7 @@ public final class MainActivity extends AppCompatActivity implements
                 previewController.cancelAutoHide();
                 previewController.showPreview();
                 unbindRecordingService();
+                new RecordingNotificationManager(this).cancel();
                 setIdleControlsEnabled(PermissionManager.hasCameraPermission(this));
                 statusTextView.setText(getString(R.string.status_error, state.getMessage()));
                 prepareIdleCameraIfNeeded();
@@ -429,6 +432,7 @@ public final class MainActivity extends AppCompatActivity implements
                 previewController.cancelAutoHide();
                 previewController.showPreview();
                 unbindRecordingService();
+                new RecordingNotificationManager(this).cancel();
                 setIdleControlsEnabled(PermissionManager.hasCameraPermission(this));
                 if (state.getOutputPath() != null) {
                     statusTextView.setText(getString(

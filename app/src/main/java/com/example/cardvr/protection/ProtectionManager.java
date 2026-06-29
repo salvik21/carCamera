@@ -9,6 +9,7 @@ public final class ProtectionManager {
     private long currentId;
     private boolean protectCurrent;
     private boolean protectNext;
+    private long protectUntilTimeMillis;
 
     public ProtectionManager(SegmentRepository repository) {
         this.repository = repository;
@@ -20,11 +21,18 @@ public final class ProtectionManager {
             protectCurrent = true;
             protectNext = false;
         }
+        if (protectUntilTimeMillis > 0 && System.currentTimeMillis() <= protectUntilTimeMillis) {
+            protectCurrent = true;
+        }
     }
 
     public synchronized boolean shouldProtectOnFinalize(long id) {
-        boolean result = id == currentId && protectCurrent;
-        if (result) protectCurrent = false;
+        boolean result = id == currentId
+                && (protectCurrent
+                || (protectUntilTimeMillis > 0 && System.currentTimeMillis() <= protectUntilTimeMillis));
+        if (result && System.currentTimeMillis() > protectUntilTimeMillis) {
+            protectCurrent = false;
+        }
         return result;
     }
 
@@ -35,5 +43,10 @@ public final class ProtectionManager {
         }
         protectCurrent = true;
         protectNext = true;
+    }
+
+    public synchronized void protectUntil(long untilTimeMillis) {
+        protectUntilTimeMillis = Math.max(protectUntilTimeMillis, untilTimeMillis);
+        protectCurrent = true;
     }
 }

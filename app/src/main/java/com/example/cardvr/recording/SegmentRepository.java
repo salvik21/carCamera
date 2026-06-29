@@ -48,4 +48,7 @@ public final class SegmentRepository {
     public int countForTrip(long id) { return dao.countForTrip(id); }
     public int countProtectedForTrip(long id) { return dao.countProtectedForTrip(id); }
     public long sizeForTrip(long id) { return dao.sizeForTrip(id); }
+    public List<VideoSegmentEntity> getSegmentsOverlapping(long fromTime, long untilTime) {
+        return dao.getSegmentsOverlapping(fromTime, untilTime);
+    }
 }

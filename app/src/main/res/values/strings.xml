@@ -50,6 +50,7 @@
     <string name="protect_recording">Защитить запись</string>
     <string name="recordings">Записи</string>
     <string name="storage_settings">Хранилище</string>
+    <string name="events">Журнал событий</string>
     <string name="recording_protected">Запись защищена</string>
     <string name="storage_error_title">Запись остановлена</string>
     <string name="storage_error_message">Недостаточно свободной памяти</string>

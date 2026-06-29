@@ -44,13 +44,34 @@ import com.example.cardvr.settings.SettingsRepository;
 import com.example.cardvr.storage.FileCleanupManager;
 import com.example.cardvr.storage.StorageLimitManager;
 import com.example.cardvr.storage.StorageManager;
+import com.example.cardvr.database.EventEntity;
+import com.example.cardvr.database.EventSeverity;
+import com.example.cardvr.database.EventStatus;
+import com.example.cardvr.database.EventType;
 import com.example.cardvr.database.TripEntity;
 import com.example.cardvr.database.TripStatus;
+import com.example.cardvr.events.BrakingDetector;
+import com.example.cardvr.events.CrashDetector;
+import com.example.cardvr.events.DetectionContext;
+import com.example.cardvr.events.DetectionResult;
+import com.example.cardvr.events.EventClassifier;
+import com.example.cardvr.events.EventNotificationManager;
+import com.example.cardvr.events.EventProtectionManager;
+import com.example.cardvr.events.EventRepository;
+import com.example.cardvr.events.ImpactDetector;
+import com.example.cardvr.events.SuddenStopDetector;
 import com.example.cardvr.location.LocationFilter;
 import com.example.cardvr.location.LocationTracker;
 import com.example.cardvr.location.SpeedCalculator;
 import com.example.cardvr.location.VideoMetadataProvider;
 import com.example.cardvr.location.VideoMetadataSnapshot;
+import com.example.cardvr.sensors.DetectionSettings;
+import com.example.cardvr.sensors.DetectionSettingsRepository;
+import com.example.cardvr.sensors.SensorCalibrationManager;
+import com.example.cardvr.sensors.SensorController;
+import com.example.cardvr.sensors.SensorDataFilter;
+import com.example.cardvr.sensors.SensorSample;
+import com.example.cardvr.sensors.SensorSnapshotProvider;
 import com.example.cardvr.trips.TripManager;
 import com.example.cardvr.trips.TripRepository;
 import com.example.cardvr.trips.TripState;
@@ -64,6 +85,7 @@ public final class RecordingService extends Service implements
         LifecycleOwner,
         SegmentManager.Listener,
         LocationTracker.Listener,
+        SensorController.Listener,
         VideoMetadataProvider,
         ChargingStateManager.Listener {
 
@@ -75,6 +97,14 @@ public final class RecordingService extends Service implements
             "com.example.cardvr.action.PROTECT_RECORDING";
     public static final String ACTION_END_TRIP =
             "com.example.cardvr.action.END_TRIP";
+    public static final String ACTION_SIMULATE_HARD_BRAKING =
+            "com.example.cardvr.action.SIMULATE_HARD_BRAKING";
+    public static final String ACTION_SIMULATE_IMPACT =
+            "com.example.cardvr.action.SIMULATE_IMPACT";
+    public static final String ACTION_SIMULATE_CRASH =
+            "com.example.cardvr.action.SIMULATE_CRASH";
+    public static final String ACTION_CALIBRATE_SENSORS =
+            "com.example.cardvr.action.CALIBRATE_SENSORS";
     public static final String EXTRA_LENS_FACING = "extra_lens_facing";
 
     private static final String TAG = "RecordingService";
@@ -108,9 +138,22 @@ public final class RecordingService extends Service implements
     private SettingsRepository settingsRepository;
     private TripManager tripManager;
     private LocationTracker locationTracker;
+    private SensorController sensorController;
+    private SensorCalibrationManager sensorCalibrationManager;
+    private SensorSnapshotProvider sensorSnapshotProvider;
+    private DetectionSettingsRepository detectionSettingsRepository;
+    private EventRepository eventRepository;
+    private EventProtectionManager eventProtectionManager;
+    private EventNotificationManager eventNotificationManager;
+    private final BrakingDetector brakingDetector = new BrakingDetector();
+    private final SuddenStopDetector suddenStopDetector = new SuddenStopDetector();
+    private final ImpactDetector impactDetector = new ImpactDetector();
+    private final CrashDetector crashDetector = new CrashDetector();
+    private final EventClassifier eventClassifier = new EventClassifier();
     private final LocationFilter locationFilter = new LocationFilter();
     private final SpeedCalculator speedCalculator = new SpeedCalculator();
     private volatile VideoMetadataSnapshot metadataSnapshot;
+    private volatile Long activeTripId;
     private final TripEndDetector tripEndDetector = new TripEndDetector();
     private volatile long lastMovementAt = System.currentTimeMillis();
     private volatile long powerDisconnectedAt;
@@ -140,6 +183,7 @@ public final class RecordingService extends Service implements
         segmentRepository = repository;
         SettingsRepository settings = new SettingsRepository(this);
         settingsRepository = settings;
+        detectionSettingsRepository = new DetectionSettingsRepository(this);
         StorageManager storage = new StorageManager(this);
         StorageLimitManager limits = new StorageLimitManager(settings, storage);
         FileCleanupManager cleanup = new FileCleanupManager(repository, storage, limits);
@@ -147,8 +191,16 @@ public final class RecordingService extends Service implements
         segmentManager = new SegmentManager(this, repository, settings, limits,
                 cleanup, protection, this);
         locationTracker = new LocationTracker(this, this);
+        eventRepository = new EventRepository(this);
+        eventProtectionManager = new EventProtectionManager(eventRepository, repository);
+        eventNotificationManager = new EventNotificationManager(this);
+        sensorCalibrationManager = new SensorCalibrationManager(this);
+        sensorSnapshotProvider = new SensorSnapshotProvider();
+        sensorController = new SensorController(this, new SensorDataFilter(),
+                sensorCalibrationManager, sensorSnapshotProvider, this);
         SegmentRepository.ioExecutor().execute(() ->
-                tripManager = new TripManager(new TripRepository(this), repository));
+                tripManager = new TripManager(new TripRepository(this), repository,
+                        eventRepository));
         SegmentRepository.ioExecutor().execute(
                 () -> new RecordingRecoveryManager(repository).recover());
         chargingStateManager.addListener(this);
@@ -159,6 +211,26 @@ public final class RecordingService extends Service implements
         String action = intent == null ? null : intent.getAction();
         if (ACTION_STOP.equals(action) || ACTION_END_TRIP.equals(action)) {
             requestStop();
+            return START_NOT_STICKY;
+        }
+        if (ACTION_SIMULATE_HARD_BRAKING.equals(action)) {
+            createSimulatedEvent(EventType.HARD_BRAKING);
+            if (!sessionStarted) stopSelf();
+            return START_NOT_STICKY;
+        }
+        if (ACTION_SIMULATE_IMPACT.equals(action)) {
+            createSimulatedEvent(EventType.IMPACT);
+            if (!sessionStarted) stopSelf();
+            return START_NOT_STICKY;
+        }
+        if (ACTION_SIMULATE_CRASH.equals(action)) {
+            createSimulatedEvent(EventType.POSSIBLE_CRASH);
+            if (!sessionStarted) stopSelf();
+            return START_NOT_STICKY;
+        }
+        if (ACTION_CALIBRATE_SENSORS.equals(action)) {
+            calibrateCurrentPosition();
+            if (!sessionStarted) stopSelf();
             return START_NOT_STICKY;
         }
         if (ACTION_PROTECT.equals(action)) {
@@ -339,9 +411,11 @@ public final class RecordingService extends Service implements
         ) == PackageManager.PERMISSION_GRANTED;
         SegmentRepository.ioExecutor().execute(() -> {
             if (tripManager == null) {
-                tripManager = new TripManager(new TripRepository(this), segmentRepository);
+                tripManager = new TripManager(new TripRepository(this), segmentRepository,
+                        eventRepository);
             }
             TripEntity trip = tripManager.startTrip();
+            activeTripId = trip.id;
             segmentManager.setTripContext(trip.id, this);
             mainHandler.post(() -> {
                 long interval = settingsRepository.getGpsIntervalMs();
@@ -351,6 +425,7 @@ public final class RecordingService extends Service implements
                     interval = 5_000L;
                 }
                 locationTracker.start(interval, settingsRepository.getGpsPriority());
+                startSensors();
                 segmentManager.start(videoCapture, recordAudio, String.valueOf(lensFacing));
             });
         });
@@ -382,6 +457,7 @@ public final class RecordingService extends Service implements
         }
         stopping = true;
         if (locationTracker != null) locationTracker.stop();
+        if (sensorController != null) sensorController.stop();
         stateManager.setStopping();
         mainHandler.removeCallbacks(timerRunnable);
         if (segmentManager.isSessionActive()) {
@@ -397,6 +473,7 @@ public final class RecordingService extends Service implements
         }
         Log.i(TAG, "Пользователь отметил текущую запись как защищённую (заглушка)");
         segmentManager.protectWindow();
+        createManualProtectionEvent();
         stateManager.markProtectedEvent();
         notificationManager.update(stateManager.getCurrentState());
     }
@@ -421,6 +498,7 @@ public final class RecordingService extends Service implements
     public void onSessionStopped(@Nullable File file) {
         SegmentRepository.ioExecutor().execute(() -> {
             if (tripManager != null) tripManager.complete(TripStatus.COMPLETED);
+            activeTripId = null;
         });
         stateManager.setIdle(file == null ? null : file.getAbsolutePath());
         finishService(false);
@@ -466,6 +544,7 @@ public final class RecordingService extends Service implements
                     settingsRepository.getGpsIntervalMs());
             TripEntity trip = tripManager.getActiveTrip();
             if (trip != null) {
+                activeTripId = trip.id;
                 TripState.Snapshot snapshot = TripState.INSTANCE.live.getValue();
                 if (snapshot == null) snapshot = new TripState.Snapshot();
                 snapshot.tripId = trip.id;
@@ -523,6 +602,153 @@ public final class RecordingService extends Service implements
         }
     }
 
+    private void startSensors() {
+        DetectionSettings settings = detectionSettingsRepository.get();
+        int battery = stateManager.getCurrentState().getBatteryPercent();
+        if (battery >= 0 && battery < 15) {
+            settings.sensorFrequency = com.example.cardvr.sensors.SensorFrequency.ECONOMY;
+        }
+        sensorController.start(settings);
+    }
+
+    @Override
+    public void onSensorAvailability(boolean accelerometer, boolean linearAcceleration,
+                                     boolean gyroscope, boolean rotationVector) {
+        if (!accelerometer) {
+            Log.w(TAG, "Accelerometer unavailable; crash detection disabled");
+        }
+        if (!linearAcceleration) {
+            Log.i(TAG, "TYPE_LINEAR_ACCELERATION unavailable; using filtered accelerometer");
+        }
+        if (!gyroscope) {
+            Log.i(TAG, "Gyroscope unavailable; impact confidence will be lower");
+        }
+        if (!rotationVector) {
+            Log.i(TAG, "Rotation vector unavailable; orientation details limited");
+        }
+    }
+
+    @Override
+    public void onSensorSample(@NonNull SensorSample sample) {
+        if (stopping || finishing) return;
+        DetectionSettings settings = detectionSettingsRepository.get();
+        DetectionContext context = new DetectionContext(sample, metadataSnapshot,
+                activeTripId, settings, sensorCalibrationManager.isCalibrated(), false);
+        if (context.tripId == null && !isDiagnosticEventAllowed(sample)) {
+            return;
+        }
+        DetectionResult braking = brakingDetector.detect(context);
+        DetectionResult suddenStop = suddenStopDetector.detect(context, braking);
+        DetectionResult impact = impactDetector.detect(context);
+        DetectionResult crash = crashDetector.detect(context, braking, suddenStop, impact);
+        DetectionResult selected = eventClassifier.classify(braking, suddenStop, impact,
+                crash, sample.timestampMillis);
+        if (selected != null) {
+            persistDetectedEvent(selected, sample, false);
+        }
+    }
+
+    private boolean isDiagnosticEventAllowed(@NonNull SensorSample sample) {
+        return sample.gyroMagnitude() > detectionSettingsRepository.get().phoneMoveGyroThreshold();
+    }
+
+    private void createSimulatedEvent(@NonNull EventType type) {
+        SensorSample sample = sensorSnapshotProvider.getLatestValid();
+        if (sample == null) {
+            sample = new SensorSample(System.currentTimeMillis(),
+                    0, 0, 9.81, -4.5, 0.4, 0.2,
+                    1.4, 0.8, 0.2, 18.0,
+                    "simulated", true);
+        }
+        DetectionSettings settings = detectionSettingsRepository.get();
+        DetectionResult result;
+        if (type == EventType.POSSIBLE_CRASH) {
+            result = new DetectionResult(type, EventSeverity.HIGH, 92,
+                    "Тестовая возможная авария", settings.crashBeforeMs,
+                    settings.crashAfterMs);
+        } else if (type == EventType.IMPACT) {
+            result = new DetectionResult(type, EventSeverity.HIGH, 82,
+                    "Тестовый сильный удар", settings.impactBeforeMs,
+                    settings.impactAfterMs);
+        } else {
+            result = new DetectionResult(EventType.HARD_BRAKING, EventSeverity.MEDIUM, 78,
+                    "Тестовое резкое торможение", settings.hardBrakingBeforeMs,
+                    settings.hardBrakingAfterMs);
+        }
+        persistDetectedEvent(result, sample, true);
+    }
+
+    private void createManualProtectionEvent() {
+        SensorSample sample = sensorSnapshotProvider.getLatestValid();
+        if (sample == null) {
+            sample = new SensorSample(System.currentTimeMillis(),
+                    0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0,
+                    null, true);
+        }
+        persistDetectedEvent(new DetectionResult(EventType.MANUAL_PROTECTION,
+                EventSeverity.LOW, 100, "Пользователь вручную защитил запись",
+                30_000L, 30_000L), sample, false);
+    }
+
+    private void calibrateCurrentPosition() {
+        SensorSample sample = sensorSnapshotProvider.getLatestValid();
+        if (sample == null) {
+            Log.w(TAG, "Sensor calibration requested before sensor sample is available");
+            return;
+        }
+        sensorCalibrationManager.calibrateFromStillSample(sample);
+        Log.i(TAG, "Sensor calibration saved");
+    }
+
+    private void persistDetectedEvent(@NonNull DetectionResult result,
+                                      @NonNull SensorSample sample,
+                                      boolean simulated) {
+        long eventTime = System.currentTimeMillis();
+        VideoMetadataSnapshot gps = metadataSnapshot;
+        EventEntity event = new EventEntity();
+        event.tripId = activeTripId;
+        event.type = result.type;
+        event.severity = result.severity;
+        event.confidence = result.confidence;
+        event.timestamp = eventTime;
+        event.latitude = gps == null ? null : gps.latitude;
+        event.longitude = gps == null ? null : gps.longitude;
+        event.speedBeforeKmh = gps == null ? 0 : gps.speedKmh;
+        event.speedAfterKmh = gps == null ? 0 : gps.speedKmh;
+        event.gpsAccuracyMeters = gps == null ? 0 : gps.accuracy;
+        event.longitudinalAcceleration = sample.linearAccelerationX;
+        event.lateralAcceleration = sample.linearAccelerationY;
+        event.verticalAcceleration = sample.linearAccelerationZ;
+        event.totalAcceleration = sample.totalAcceleration;
+        event.impactG = sample.totalAcceleration / 9.81d;
+        event.gyroMagnitude = sample.gyroMagnitude();
+        event.orientationBefore = sample.orientation;
+        event.orientationAfter = sample.orientation;
+        event.phonePositionChanged = result.type == EventType.PHONE_MOVED
+                || sample.gyroMagnitude() > detectionSettingsRepository.get().phoneMoveGyroThreshold();
+        event.protectedFromTime = eventTime - result.beforeMs;
+        event.protectedUntilTime = eventTime + result.afterMs;
+        event.status = EventStatus.DETECTED;
+        event.simulated = simulated;
+        event.explanation = sensorCalibrationManager.isCalibrated()
+                ? result.explanation
+                : result.explanation + ". Калибровка не выполнена, точность ниже.";
+        event.createdAt = eventTime;
+        SegmentRepository.ioExecutor().execute(() -> {
+            event.id = eventRepository.insert(event);
+            int protectedCount = eventProtectionManager.protectExistingSegments(event);
+            if (segmentManager != null && segmentManager.isSessionActive()) {
+                segmentManager.protectUntil(event.protectedUntilTime);
+            }
+            if (protectedCount > 0) {
+                event.status = EventStatus.PROTECTED;
+                eventRepository.update(event);
+            }
+            eventNotificationManager.notifyEvent(event);
+        });
+    }
+
     private void handleCameraError(String prefix, Throwable throwable) {
         stateManager.setError(buildErrorMessage(prefix, throwable));
         finishService(false);
@@ -539,18 +765,25 @@ public final class RecordingService extends Service implements
         releaseRecordingWakeLock();
         batteryMonitor.stop();
         if (locationTracker != null) locationTracker.stop();
+        if (sensorController != null) sensorController.stop();
         chargingStateManager.removeListener(this);
         chargingStateManager.resetTripWarningPreference();
         if (setIdleIfNeeded && stateManager.getCurrentState().isServiceActive()) {
             stateManager.setIdle(null);
         }
+        removeForegroundNotification();
+        stopSelf();
+    }
+
+    @SuppressWarnings("deprecation")
+    private void removeForegroundNotification() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             stopForeground(STOP_FOREGROUND_REMOVE);
-        } else {
-            stopForeground(true);
         }
-        notificationManager.cancel();
-        stopSelf();
+        stopForeground(true);
+        if (notificationManager != null) {
+            notificationManager.cancel();
+        }
     }
 
     private void releaseCamera() {
@@ -594,6 +827,8 @@ public final class RecordingService extends Service implements
         if (!finishing && segmentManager.isSessionActive()) {
             segmentManager.stop();
         }
+        if (sensorController != null) sensorController.stop();
+        removeForegroundNotification();
         releaseCamera();
         releaseRecordingWakeLock();
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP);

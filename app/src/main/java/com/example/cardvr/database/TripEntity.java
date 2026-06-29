@@ -24,5 +24,8 @@ public class TripEntity {
     public long totalVideoSizeBytes;
     public int segmentCount;
     public int protectedSegmentCount;
+    public int hardBrakingCount;
+    public int impactCount;
+    public int possibleCrashCount;
     public long createdAt;
 }

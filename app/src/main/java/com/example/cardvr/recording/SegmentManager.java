@@ -103,6 +103,10 @@ public final class SegmentManager implements SegmentRecorder.Listener {
         SegmentRepository.ioExecutor().execute(protection::protectWindow);
     }
 
+    public void protectUntil(long untilTimeMillis) {
+        SegmentRepository.ioExecutor().execute(() -> protection.protectUntil(untilTimeMillis));
+    }
+
     private void createAndStartNext() {
         SegmentRepository.ioExecutor().execute(() -> {
             try {

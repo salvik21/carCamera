@@ -32,4 +32,34 @@ public final class DatabaseConverters {
     public static TripStatus toTripStatus(String value) {
         return value == null ? null : TripStatus.valueOf(value);
     }
+
+    @TypeConverter
+    public static String fromEventType(EventType value) {
+        return value == null ? null : value.name();
+    }
+
+    @TypeConverter
+    public static EventType toEventType(String value) {
+        return value == null ? null : EventType.valueOf(value);
+    }
+
+    @TypeConverter
+    public static String fromEventSeverity(EventSeverity value) {
+        return value == null ? null : value.name();
+    }
+
+    @TypeConverter
+    public static EventSeverity toEventSeverity(String value) {
+        return value == null ? null : EventSeverity.valueOf(value);
+    }
+
+    @TypeConverter
+    public static String fromEventStatus(EventStatus value) {
+        return value == null ? null : value.name();
+    }
+
+    @TypeConverter
+    public static EventStatus toEventStatus(String value) {
+        return value == null ? null : EventStatus.valueOf(value);
+    }
 }

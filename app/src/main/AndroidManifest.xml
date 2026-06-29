@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
     <uses-feature
         android:name="android.hardware.camera.any"
@@ -38,6 +39,12 @@
         <activity android:name=".ui.SettingsActivity" android:exported="false" />
         <activity android:name=".ui.RecordingsActivity" android:exported="false" />
         <activity android:name=".ui.TripSummaryActivity" android:exported="false" />
+        <activity android:name=".ui.EventsActivity" android:exported="false" />
+        <activity
+            android:name=".ui.EmergencyActivity"
+            android:exported="false"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.files"

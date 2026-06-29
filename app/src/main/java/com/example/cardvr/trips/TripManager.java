@@ -3,14 +3,17 @@ package com.example.cardvr.trips;
 import android.location.Location;
 
 import com.example.cardvr.database.LocationPointEntity;
+import com.example.cardvr.database.EventType;
 import com.example.cardvr.database.TripEntity;
 import com.example.cardvr.database.TripStatus;
+import com.example.cardvr.events.EventRepository;
 import com.example.cardvr.location.DistanceCalculator;
 import com.example.cardvr.recording.SegmentRepository;
 
 public final class TripManager {
     private final TripRepository repository;
     private final SegmentRepository segments;
+    private final EventRepository events;
     private final RouteRecorder route = new RouteRecorder();
     private final DistanceCalculator distance = new DistanceCalculator();
     private final TripStatisticsCalculator statistics = new TripStatisticsCalculator();
@@ -20,6 +23,15 @@ public final class TripManager {
     public TripManager(TripRepository repository, SegmentRepository segments) {
         this.repository = repository;
         this.segments = segments;
+        this.events = null;
+        active = repository.getActive();
+    }
+
+    public TripManager(TripRepository repository, SegmentRepository segments,
+                       EventRepository events) {
+        this.repository = repository;
+        this.segments = segments;
+        this.events = events;
         active = repository.getActive();
     }
 
@@ -62,6 +74,11 @@ public final class TripManager {
         active.segmentCount = segments.countForTrip(active.id);
         active.protectedSegmentCount = segments.countProtectedForTrip(active.id);
         active.totalVideoSizeBytes = segments.sizeForTrip(active.id);
+        if (events != null) {
+            active.hardBrakingCount = events.countForTripByType(active.id, EventType.HARD_BRAKING);
+            active.impactCount = events.countForTripByType(active.id, EventType.IMPACT);
+            active.possibleCrashCount = events.countForTripByType(active.id, EventType.POSSIBLE_CRASH);
+        }
         repository.update(active);
         TripEntity result = active;
         active = null;
